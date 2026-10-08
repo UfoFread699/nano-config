@@ -20,7 +20,12 @@ for cmd in nano curl; do
   fi
 done
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || pwd)"
+# --- Locate local files (works both for ./install.sh and curl | bash) ---
+SCRIPT_FILE="${BASH_SOURCE[0]:-}"
+SCRIPT_DIR=""
+if [ -n "$SCRIPT_FILE" ] && [ -f "$SCRIPT_FILE" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_FILE")" && pwd)"
+fi
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 
 # --- Backup existing config ---
@@ -36,7 +41,7 @@ fi
 mkdir -p "$HOME/.nano"
 
 # --- Install from local checkout if available, otherwise download ---
-if [ -f "${SCRIPT_DIR}/nanorc" ] && [ -d "${SCRIPT_DIR}/nano" ]; then
+if [ -n "$SCRIPT_DIR" ] && [ -f "${SCRIPT_DIR}/nanorc" ] && [ -d "${SCRIPT_DIR}/nano" ]; then
   echo "Installing from local files..."
   cp "${SCRIPT_DIR}/nanorc" "$HOME/.nanorc"
   cp "${SCRIPT_DIR}"/nano/*.nanorc "$HOME/.nano/"
